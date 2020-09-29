@@ -1,5 +1,7 @@
 h1 #{ meta.title }
 
+img(src=`${ app.tagsConfig['tag_overview_' + meta.tag + '_image'] || app.tagsConfig.tag_overview_default_image }` alt='')
+
 section
     each page, index in meta.taggedPages
         article

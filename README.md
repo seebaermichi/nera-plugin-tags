@@ -7,12 +7,15 @@ To install this plugin, just copy or clone all of this plugins code into the `sr
 
 In addition you could setup a few things in the `config/tags.yaml`.
 ```yaml
-meta_property_name: tags # optional
-tag_overview_path: '' # optional
-tag_separator: ',' # optional
-tag_overview_layout: pages/default.pug # optional
-tag_overview_website_image: /img/banner/website-banner.jpg # optional
-tag_overview_default_image: /img/banner/banner.jpg # optional
+# all optional, the values given here are the defaults
+meta_property_name: tags
+tag_overview_path: ''
+tag_separator: ','
+tag_overview_layout: pages/default.pug
+
+# examples
+tag_overview_default_image: /img/banner/banner.jpg
+tag_overview_website_image: /img/banner/website-banner.jpg
 ```
 As you see all properties are optional. The values showing here are the defaults, at least for the first four properties.  
 
