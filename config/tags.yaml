@@ -1,0 +1,5 @@
+meta_property_name: tags
+tag_overview_path: /tags
+tag_overview_layout: pages/tags-overview.pug
+tag_overview_banner: /img/banner/@tag@-banner.jpg
+tag_overview_default_banner: /img/banner/banner.jpg

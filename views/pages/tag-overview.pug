@@ -1,0 +1,13 @@
+h1 #{ meta.title }
+
+section
+    each page, index in meta.taggedPages
+        article
+            // Use whatever porperties you add in your pages meta section here
+            h2 #{ page.meta.title }
+
+            span #{ page.meta.createdAt.toLocaleString(app.lang) }
+
+            p #{ page.meta.description }
+
+            a(href=`${ page.meta.href }`) Read more
