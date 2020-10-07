@@ -5,7 +5,7 @@ const { getConfig } = require('../plugin-helper')
 module.exports = (() => {
     const config = getConfig(`${__dirname}/config/tags.yaml`)
     const metaPropertyName = config.meta_property_name || 'tags'
-    const tagOverviewPath = config.tag_overview_path || ''
+    const tagOverviewPath = config.tag_overview_path || '/tags'
     const tagOverviewLayout = config.tag_overview_layout || 'pages/default.pug'
     const tagSeparator = config.tag_separator || ','
 
@@ -59,12 +59,6 @@ module.exports = (() => {
 
     const getMetaData = data => {
         if (data.pagesData !== null && typeof data.pagesData === 'object') {
-            data.pagesData = data.pagesData.map(({ content, meta }) => ({
-                content,
-                meta: Object.assign({}, meta, {
-                    tagLinks: getTagLinks(meta[metaPropertyName])
-                })
-            }))
 
             // Generate tag overview pages
             const tagCloud = getTagCloud(data.pagesData, data.app)
@@ -84,6 +78,13 @@ module.exports = (() => {
                     }
                 })
             })
+
+            data.pagesData = data.pagesData.map(({ content, meta }) => ({
+                content,
+                meta: Object.assign({}, meta, {
+                    tagLinks: getTagLinks(meta[metaPropertyName])
+                })
+            }))
         }
 
         return data.pagesData

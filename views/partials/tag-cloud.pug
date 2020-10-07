@@ -1,2 +1,3 @@
-each tag in app.tagCloud
-    a(href=`${ tag.href }`) #{ tag.name }
+if app.tagCloud.length > 0
+    each tag in app.tagCloud
+        a(href=`${ tag.href }`) #{ tag.name }

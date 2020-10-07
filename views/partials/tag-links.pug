@@ -1,2 +1,3 @@
-each tag in meta.tagLinks
-    a(href=`${ tag.href }`) #{ tag.name }
+if meta.tagLinks.length > 0
+    each tag in meta.tagLinks
+        a(href=`${ tag.href }`) #{ tag.name }
