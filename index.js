@@ -7,6 +7,7 @@ module.exports = (() => {
     const metaPropertyName = config.meta_property_name || 'tags'
     const tagOverviewPath = config.tag_overview_path || '/tags'
     const tagOverviewLayout = config.tag_overview_layout || 'pages/default.pug'
+    const tagOverviewMeta = config.tag_overview_meta || {}
     const tagSeparator = config.tag_separator || ','
 
     const getTagHref = (path, tag) => `${path}/${tag.toLowerCase()}.html`
@@ -41,8 +42,8 @@ module.exports = (() => {
     }
 
     const getTaggedPages = (pagesData, tag) => {
-        return pagesData.filter(({ meta }) => meta[metaPropertyName]
-            && meta[metaPropertyName].includes(tag))
+        return pagesData.filter(({ meta }) => meta[metaPropertyName] &&
+            meta[metaPropertyName].includes(tag))
             .sort((a, b) => new Date(b.meta.createdAt) - new Date(a.meta.createdAt))
     }
 
@@ -59,13 +60,12 @@ module.exports = (() => {
 
     const getMetaData = data => {
         if (data.pagesData !== null && typeof data.pagesData === 'object') {
-
             // Generate tag overview pages
             const tagCloud = getTagCloud(data.pagesData, data.app)
             tagCloud.forEach(tag => {
                 data.pagesData.push({
                     content: '',
-                    meta: {
+                    meta: Object.assign({}, tagOverviewMeta, {
                         layout: tagOverviewLayout,
                         title: tag.name,
                         createdAt: new Date(),
@@ -74,8 +74,8 @@ module.exports = (() => {
                         pagePathName: tagOverviewPath.replace('/', ''),
                         dirname: tagOverviewPath.replace('/', ''),
                         tag: tag.name,
-                        taggedPages: getTaggedPages(data.pagesData, tag.name),
-                    }
+                        taggedPages: getTaggedPages(data.pagesData, tag.name)
+                    })
                 })
             })
 
