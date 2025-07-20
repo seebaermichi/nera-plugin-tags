@@ -1,16 +1,18 @@
-h1 #{ meta.title }
+section.tag-overview
+    header.tag-overview__header
+        h1.tag-overview__title #{ meta.title }
 
-img(src=`${ app.tagsConfig['tag_overview_' + meta.tag + '_image'] || app.tagsConfig.tag_overview_default_image }` alt='')
+        if app.tagsConfig['tag_overview_' + meta.tag + '_image'] || app.tagsConfig.tag_overview_default_image
+            img.tag-overview__image(src=`${ app.tagsConfig['tag_overview_' + meta.tag + '_image'] || app.tagsConfig.tag_overview_default_image }` alt='')
 
-if meta.taggedPages.length > 0
-    section
-        each page, index in meta.taggedPages
-            article
-                // Use whatever porperties you add in your pages meta section here
-                h2 #{ page.meta.title }
+    if meta.taggedPages.length > 0
+        section.tag-overview__content
+            each page, index in meta.taggedPages
+                article.tag-overview__item
+                    h2.tag-overview__item-title #{ page.meta.title }
 
-                span #{ page.meta.createdAt.toLocaleString(app.lang) }
+                    time.tag-overview__item-date #{ page.meta.createdAt.toLocaleString(app.lang) }
 
-                p #{ page.meta.description }
+                    p.tag-overview__item-description #{ page.meta.description }
 
-                a(href=`${ page.meta.href }`) Read more
+                    a.tag-overview__item-link(href=`${ page.meta.href }`) Read more

@@ -1,16 +1,61 @@
 {
-  "name": "tags",
-  "version": "1.0.0",
-  "description": "A plugin for static side generator nera to create a tag cloud, a tag link list and tag overview pages out of tags of page",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "“Michael <micha.becker79@gmail.com> (https://github.com/seebaermichi)",
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/seebaermichi/nera-plugin-tags"
-  }
+    "name": "@nera-static/plugin-tags",
+    "version": "2.0.0",
+    "description": "A plugin for Nera static site generator to create tag clouds, tag links and tag overview pages. Perfect for content organization and taxonomy management.",
+    "main": "index.js",
+    "scripts": {
+        "publish-template": "node ./bin/publish-template.js",
+        "lint": "eslint .",
+        "test": "vitest"
+    },
+    "type": "module",
+    "exports": {
+        ".": "./index.js"
+    },
+    "bin": {
+        "nera-tags": "./bin/publish-template.js"
+    },
+    "files": [
+        "bin",
+        "config",
+        "views",
+        "index.js"
+    ],
+    "keywords": [
+        "nera",
+        "plugin",
+        "tags",
+        "static-site",
+        "static-site-generator",
+        "tag-cloud",
+        "tag-links",
+        "taxonomy",
+        "content-organization",
+        "markdown",
+        "frontmatter"
+    ],
+    "author": "Michael Becker",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/seebaermichi/nera-plugin-tags.git"
+    },
+    "bugs": {
+        "url": "https://github.com/seebaermichi/nera-plugin-tags/issues"
+    },
+    "homepage": "https://github.com/seebaermichi/nera-plugin-tags#readme",
+    "dependencies": {
+        "@nera-static/plugin-utils": "^1.1.0"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "devDependencies": {
+        "cheerio": "^1.1.0",
+        "eslint": "^9.31.0",
+        "husky": "^9.1.7",
+        "pug": "^3.0.3",
+        "vitest": "^3.2.4"
+    },
+    "sideEffects": false
 }

@@ -1,3 +1,4 @@
 if meta.tagLinks.length > 0
-    each tag in meta.tagLinks
-        a(href=`${ tag.href }`) #{ tag.name }
+    section.tag-links
+        each tag in meta.tagLinks
+            a.tag-links__item(href=`${ tag.href }`) #{ tag.name }
