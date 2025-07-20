@@ -53,13 +53,6 @@ tag_overview_javascript_image: '/images/tags/js-logo.jpg'
 tag_overview_css_image: '/images/tags/css-logo.jpg'
 ```
 
-- **`meta_property_name`**: The meta field containing tags (defaults to `tags`)
-- **`tag_separator`**: Character used to separate tags (defaults to `,`)
-- **`tag_overview_path`**: Base URL path for tag pages (defaults to `/tags`)
-- **`tag_overview_layout`**: Layout template for tag overview pages
-- **`tag_overview_meta`**: Additional meta properties for tag pages
-- **`tag_overview_*_image`**: Tag-specific or default images
-
 ## 🧩 Usage
 
 ### Mark content with tags
@@ -217,9 +210,21 @@ include /vendor/plugin-tags/partials/tag-links
 include /vendor/plugin-tags/pages/tag-overview
 ```
 
-## 🎨 Styling with BEM CSS
+## 🎨 Styling
 
-The templates use BEM (Block Element Modifier) methodology for CSS classes.
+The plugin uses BEM CSS methodology with the following classes:
+
+**Tag Cloud:**
+- `.tag-cloud` - Main container
+- `.tag-cloud__list` - Tag list container
+- `.tag-cloud__item` - Individual tag link
+
+**Tag Links:**
+- `.tag-links` - Main container
+- `.tag-links__list` - Tag list container
+- `.tag-links__item` - Individual tag link
+
+You can customize the styling by overriding these classes in your CSS.
 
 ## 📊 Generated URLs
 
@@ -239,57 +244,13 @@ npm test
 npm run lint
 ```
 
-### Testing
+Tests use [Vitest](https://vitest.dev) and cover:
 
-The plugin includes comprehensive tests covering:
-
-- **Unit tests** for tag cloud generation, tag links, and page generation
-- **Integration tests** for template publishing functionality
-- **Template rendering tests** for all included Pug templates with BEM classes
-
-Tests validate tag extraction, deduplication, sorting, URL generation, and template rendering with various data scenarios.
-
-## 🔧 Advanced Configuration
-
-### Custom Tag Separators
-
-```yaml
-# Use pipe separator instead of comma
-tag_separator: '|'
-```
-
-```yaml
----
-title: My Article
-tags: javascript|react|frontend
----
-```
-
-### Custom Meta Property
-
-```yaml
-# Use 'categories' instead of 'tags'
-meta_property_name: categories
-```
-
-```yaml
----
-title: My Article
-categories: javascript, react, frontend
----
-```
-
-### Custom Paths and Layouts
-
-```yaml
-# Custom tag overview configuration
-tag_overview_path: '/topics'
-tag_overview_layout: 'layouts/topic-page.pug'
-tag_overview_meta:
-  layout: 'layouts/topic-page.pug'
-  description: 'Browse articles by topic'
-  image: '/images/topics-banner.jpg'
-```
+- Tag cloud generation and sorting
+- Tag links creation for pages
+- Page generation with tag filtering
+- Template rendering functionality
+- URL generation and cleaning
 
 ## 🧑‍💻 Author
 
@@ -298,10 +259,16 @@ Michael Becker
 
 ## 🔗 Links
 
--   [Plugin Repository](https://github.com/seebaermichi/nera-plugin-tags)
--   [NPM Package](https://www.npmjs.com/package/@nera-static/plugin-tags)
--   [Nera Static Site Generator](https://github.com/seebaermichi/nera)
+- [Plugin Repository](https://github.com/seebaermichi/nera-plugin-tags)
+- [NPM Package](https://www.npmjs.com/package/@nera-static/plugin-tags)
+- [Nera Static Site Generator](https://github.com/seebaermichi/nera)
 
-## 📄 License
+## 🧩 Compatibility
+
+- **Nera**: v4.1.0+
+- **Node.js**: >= 18
+- **Plugin API**: Uses `getAppData()` and `getMetaData()` for tag processing
+
+## 📦 License
 
 MIT
