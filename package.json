@@ -13,7 +13,7 @@
         ".": "./index.js"
     },
     "bin": {
-        "nera-tags": "./bin/publish-template.js"
+        "nera-tags": "bin/publish-template.js"
     },
     "files": [
         "bin",
@@ -38,7 +38,7 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/seebaermichi/nera-plugin-tags.git"
+        "url": "git+https://github.com/seebaermichi/nera-plugin-tags.git"
     },
     "bugs": {
         "url": "https://github.com/seebaermichi/nera-plugin-tags/issues"
