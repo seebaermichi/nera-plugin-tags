@@ -19,7 +19,8 @@
         "bin",
         "config",
         "views",
-        "index.js"
+        "index.js",
+        "CHANGELOG.md"
     ],
     "keywords": [
         "nera",
