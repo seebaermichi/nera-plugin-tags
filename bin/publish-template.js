@@ -7,6 +7,7 @@ import { publishTemplates } from '@nera-static/plugin-utils'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const pluginName = 'plugin-tags'
 const sourceDir = path.resolve(__dirname, '../views/')
+const force = process.argv.includes('--force')
 
 const templateFiles = [
     'pages/tag-overview.pug',
@@ -18,7 +19,7 @@ const result = publishTemplates({
     pluginName,
     sourceDir,
     templateFiles,
-    expectedPackageName: 'dummy', // for test-only override
+    force,
 })
 
 process.exit(result ? 0 : 1)

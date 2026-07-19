@@ -12,6 +12,8 @@ A plugin for the [Nera](https://github.com/seebaermichi/nera) static site genera
 - Includes ready-to-use Pug templates with BEM CSS methodology
 - Template publishing system for easy customization
 - Configurable tag separators, paths, and layouts
+- Case-folded, slugified tag URLs — `CSS` and `css` share one page
+- Tags may be written as a separated string or a YAML list
 - Lightweight and zero-runtime overhead
 - Full compatibility with Nera v4.1.0+
 
@@ -47,11 +49,15 @@ tag_overview_meta:
   description: 'Browse content by tag'
   layout: 'pages/tag-layout.pug'
 
-# Optional: Tag-specific images
+# Optional: Tag-specific images, keyed by the tag's slug
 tag_overview_default_image: '/images/tags/default.jpg'
 tag_overview_javascript_image: '/images/tags/js-logo.jpg'
-tag_overview_css_image: '/images/tags/css-logo.jpg'
+tag_overview_web-development_image: '/images/tags/webdev.jpg'
 ```
+
+These keys are exposed to templates as `app.tagsConfig`. The lookup uses the
+tag's slug (see [Generated URLs](#-generated-urls)), so a multi-word tag such
+as `web development` is configured as `tag_overview_web-development_image`.
 
 ## 🧩 Usage
 
@@ -69,6 +75,17 @@ tags: javascript, programming, web development, frontend
 # Getting Started with JavaScript
 
 Your content here...
+```
+
+A YAML list works just as well, and avoids the separator entirely:
+
+```yaml
+---
+title: CSS Grid Layout Guide
+tags:
+    - css
+    - web development
+---
 ```
 
 ```yaml
@@ -139,11 +156,13 @@ section.tag-overview
 [
     {
         name: "javascript",
+        slug: "javascript",
         href: "/tags/javascript.html"
     },
     {
-        name: "css",
-        href: "/tags/css.html"
+        name: "web development",
+        slug: "web-development",
+        href: "/tags/web-development.html"
     }
 ]
 ```
@@ -153,10 +172,12 @@ section.tag-overview
 [
     {
         name: "javascript",
+        slug: "javascript",
         href: "/tags/javascript.html"
     },
     {
         name: "programming",
+        slug: "programming",
         href: "/tags/programming.html"
     }
 ]
@@ -181,7 +202,7 @@ section.tag-overview
 Use the default templates provided by the plugin:
 
 ```bash
-npx @nera-static/plugin-tags run publish-template
+npx nera-tags
 ```
 
 This copies template files to your project:
@@ -210,19 +231,56 @@ include /vendor/plugin-tags/partials/tag-links
 include /vendor/plugin-tags/pages/tag-overview
 ```
 
+Point `tag_overview_layout` at a layout that includes
+`pages/tag-overview`, so generated tag pages render through it.
+
+Publishing **skips** a `views/vendor/plugin-tags/` that already exists, so
+your edits are never silently overwritten. To pull in updated templates after
+upgrading the plugin, re-run with `--force` — this discards local edits, so
+re-apply them afterwards:
+
+```bash
+npx nera-tags --force
+```
+
+## 🔢 Plugin ordering
+
+This is the only plugin that *adds* pages, and plugins run alphabetically
+unless `config/plugin-order.yaml` says otherwise. Tag pages are therefore
+created after any plugin sorting before `tags` has already run, and those
+plugins never see them — a layout reading, say, `meta.canonicalLink.href`
+works on your authored pages and fails on every generated tag page.
+
+If your layout depends on metadata another plugin adds, list `tags` early:
+
+```yaml
+start:
+    - plugin-tags
+```
+
+Note the trade-off rather than assuming earlier is always better: running
+`tags` first means `meta.taggedPages` captures each page's metadata *before*
+later plugins enrich it. Order for whichever of the two your templates
+actually read.
+
 ## 🎨 Styling
 
 The plugin uses BEM CSS methodology with the following classes:
 
 **Tag Cloud:**
 - `.tag-cloud` - Main container
-- `.tag-cloud__list` - Tag list container
 - `.tag-cloud__item` - Individual tag link
 
 **Tag Links:**
 - `.tag-links` - Main container
-- `.tag-links__list` - Tag list container
 - `.tag-links__item` - Individual tag link
+
+**Tag Overview:**
+- `.tag-overview` / `.tag-overview__header` / `.tag-overview__title`
+- `.tag-overview__image` - Optional configured tag image
+- `.tag-overview__content` - Wrapper around the list of tagged pages
+- `.tag-overview__item` and its `__item-title`, `__item-date`,
+  `__item-description`, `__item-link` children
 
 You can customize the styling by overriding these classes in your CSS.
 
@@ -234,7 +292,22 @@ Tag overview pages are automatically generated with clean URLs:
 - `/tags/css.html` - All CSS-related content
 - `/tags/web-development.html` - All web development content
 
-Tags with spaces or special characters are URL-safe (converted to lowercase, spaces become hyphens).
+Each tag is reduced to a slug for its URL: diacritics are stripped, case is
+folded, and every run of characters that is not a letter or digit becomes a
+single hyphen.
+
+| Tag | Slug | URL |
+|---|---|---|
+| `JavaScript` | `javascript` | `/tags/javascript.html` |
+| `web development` | `web-development` | `/tags/web-development.html` |
+| `vue.js` | `vue-js` | `/tags/vue-js.html` |
+| `Übergrößen` | `ubergrossen` | `/tags/ubergrossen.html` |
+
+Tags that share a slug share a page, which is why `CSS` and `css` do not
+produce two half-populated overviews. The name shown in the tag cloud is the
+alphabetically first variant found, so results do not depend on the order
+pages happen to be read in. A tag with no URL-safe characters at all (`+++`)
+is skipped with a warning rather than generating an unreachable page.
 
 ## 🧪 Development
 
@@ -246,11 +319,11 @@ npm run lint
 
 Tests use [Vitest](https://vitest.dev) and cover:
 
-- Tag cloud generation and sorting
+- Tag cloud generation, sorting, slugging and case folding
 - Tag links creation for pages
-- Page generation with tag filtering
-- Template rendering functionality
-- URL generation and cleaning
+- Generated page metadata against the shape the generator writes files from
+- Template rendering, including the shipped templates fed with real plugin output
+- Template publishing, with and without `--force`
 
 ## 🧑‍💻 Author
 
@@ -268,6 +341,7 @@ Michael Becker
 - **Nera**: v4.1.0+
 - **Node.js**: >= 18
 - **Plugin API**: Uses `getAppData()` and `getMetaData()` for tag processing
+- **`@nera-static/plugin-utils`**: ^1.2.0
 
 ## 📦 License
 

@@ -5,6 +5,84 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-07-19
+
+### Fixed
+
+-   **BREAKING**: generated tag pages are written to `public/tags/<slug>.html`
+    instead of a single `public/tags/undefined` file. Generated page meta now
+    carries `filename`, `dirname` and `fullPath`, derived from the same href
+    the tag links point at, so no tag link can 404 against its own page
+-   **BREAKING**: tag URLs are slugified and case-folded, so `CSS` and `css`
+    resolve to one page listing every page tagged either way
+-   **BREAKING**: the shipped `views/pages/tag-overview.pug` no longer reads
+    `app.tagsConfig` unguarded. Using it as `tag_overview_layout` previously
+    failed the whole build with `Cannot read properties of undefined`
+-   `tags` frontmatter accepts a YAML list (`tags: [css, js]`) as well as a
+    separated string. The list form previously threw `tags.split is not a
+    function` and aborted the build; non-string scalars such as `tags: 2024`
+    are coerced rather than throwing
+-   `tag_overview_meta.layout` is honoured instead of being silently
+    overridden by `tag_overview_layout`, as `README.md` has always documented
+-   `getMetaData` no longer mutates the `pagesData` array it is given
+-   `tag_overview_path` is normalized, so `tags`, `/tags` and `/tags/` all
+    produce the same hrefs
+
+### Added
+
+-   `app.tagsConfig` exposes `config/tags.yaml`, making the documented
+    `tag_overview_default_image` and `tag_overview_<tag>_image` keys work
+-   `slug` on every `app.tagCloud` and `meta.tagLinks` entry, and `tagSlug` on
+    generated pages, so templates can address a tag by its URL token
+-   `--force` on `publish-template`, to overwrite an existing
+    `views/vendor/plugin-tags/` (requires `@nera-static/plugin-utils@^1.2.0`)
+
+### Changed
+
+-   Configuration is read inside the hooks rather than at module load, so a
+    host that changes directory between import and render is handled correctly
+
+### Migration from v2.x
+
+**Tag overview pages did not work at all in 2.x** — every one of them was
+written to the single file `public/tags/undefined`, so no tag URL ever
+resolved. Nothing that currently serves can break; what changes is the set of
+hrefs the plugin emits into your pages.
+
+Tag hrefs were already lowercased in 2.x, so a tag that is a single
+alphanumeric word is unaffected. Anything else changes:
+
+| Tag in frontmatter | 2.x href | 3.0.0 href |
+|---|---|---|
+| `javascript` | `/tags/javascript.html` | `/tags/javascript.html` (unchanged) |
+| `JavaScript` | `/tags/javascript.html` | `/tags/javascript.html` (unchanged) |
+| `web development` | `/tags/web development.html` | `/tags/web-development.html` |
+| `vue.js` | `/tags/vue.js.html` | `/tags/vue-js.html` |
+| `C++` | `/tags/c++.html` | `/tags/c.html` |
+| `Übergrößen` | `/tags/übergrößen.html` | `/tags/ubergrossen.html` |
+
+`JavaScript` and `javascript` previously produced **two** overview pages that
+claimed the same href, each listing only the pages matching its exact casing.
+They now produce **one** page listing both. The displayed tag name is the
+alphabetically first variant found, so a site using both `CSS` and `css` shows
+`css`; pick one spelling in your frontmatter if you want the other.
+
+Two things need action on your side:
+
+1.  **Re-publish the templates.** `publish-template` skips a directory that
+    already exists, so an existing `views/vendor/plugin-tags/` keeps the 2.x
+    `tag-overview.pug` — including the unguarded `app.tagsConfig` read that
+    breaks the build. Run `npx nera-tags --force`, or delete the directory
+    first. If you have edited your copy, re-apply your changes afterwards.
+2.  **Rename any `tag_overview_<tag>_image` key to use the slug.** The lookup
+    is now `tag_overview_web-development_image`, not
+    `tag_overview_web development_image` — which YAML could not express in the
+    first place. The un-slugged key is still accepted as a fallback, so
+    single-word tags need no change.
+
+If you hardcoded a tag URL anywhere, or styled one via a URL selector, update
+it using the table above. The BEM class names are unchanged.
+
 ## [2.0.0] - 2025-07-20
 
 ### Added

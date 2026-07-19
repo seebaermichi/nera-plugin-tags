@@ -1,6 +1,6 @@
 {
     "name": "@nera-static/plugin-tags",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "description": "A plugin for Nera static site generator to create tag clouds, tag links and tag overview pages. Perfect for content organization and taxonomy management.",
     "main": "index.js",
     "scripts": {
@@ -13,7 +13,7 @@
         ".": "./index.js"
     },
     "bin": {
-        "nera-tags": "bin/publish-template.js"
+        "nera-tags": "./bin/publish-template.js"
     },
     "files": [
         "bin",
@@ -38,14 +38,14 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/seebaermichi/nera-plugin-tags.git"
+        "url": "https://github.com/seebaermichi/nera-plugin-tags"
     },
     "bugs": {
         "url": "https://github.com/seebaermichi/nera-plugin-tags/issues"
     },
     "homepage": "https://github.com/seebaermichi/nera-plugin-tags#readme",
     "dependencies": {
-        "@nera-static/plugin-utils": "^1.1.0"
+        "@nera-static/plugin-utils": "^1.2.0"
     },
     "engines": {
         "node": ">=18"

@@ -2,11 +2,17 @@ import { describe, it, expect } from 'vitest'
 import { load } from 'cheerio'
 import pug from 'pug'
 import path from 'path'
+import { fileURLToPath } from 'url'
+
+// Resolved from this file rather than from `process.cwd()`, so the suite does
+// not silently depend on vitest being started from the package root.
+const viewsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../views')
+const template = name => path.join(viewsDir, name)
 
 describe('Tag templates', () => {
     describe('tag-cloud.pug', () => {
         it('renders tag cloud with links', () => {
-            const templatePath = path.resolve('views/partials/tag-cloud.pug')
+            const templatePath = template('partials/tag-cloud.pug')
             const mockData = {
                 app: {
                     tagCloud: [
@@ -29,7 +35,7 @@ describe('Tag templates', () => {
         })
 
         it('renders nothing when no tags exist', () => {
-            const templatePath = path.resolve('views/partials/tag-cloud.pug')
+            const templatePath = template('partials/tag-cloud.pug')
             const mockData = {
                 app: {
                     tagCloud: []
@@ -47,7 +53,7 @@ describe('Tag templates', () => {
 
     describe('tag-links.pug', () => {
         it('renders tag links for a page', () => {
-            const templatePath = path.resolve('views/partials/tag-links.pug')
+            const templatePath = template('partials/tag-links.pug')
             const mockData = {
                 meta: {
                     tagLinks: [
@@ -68,7 +74,7 @@ describe('Tag templates', () => {
         })
 
         it('renders nothing when page has no tags', () => {
-            const templatePath = path.resolve('views/partials/tag-links.pug')
+            const templatePath = template('partials/tag-links.pug')
             const mockData = {
                 meta: {
                     tagLinks: []
@@ -86,7 +92,7 @@ describe('Tag templates', () => {
 
     describe('tag-overview.pug', () => {
         it('renders tag overview page with tagged pages', () => {
-            const templatePath = path.resolve('views/pages/tag-overview.pug')
+            const templatePath = template('pages/tag-overview.pug')
             const mockData = {
                 app: {
                     lang: 'en',
@@ -141,7 +147,7 @@ describe('Tag templates', () => {
         })
 
         it('renders with custom tag-specific image', () => {
-            const templatePath = path.resolve('views/pages/tag-overview.pug')
+            const templatePath = template('pages/tag-overview.pug')
             const mockData = {
                 app: {
                     lang: 'en',
@@ -153,6 +159,7 @@ describe('Tag templates', () => {
                 meta: {
                     title: 'javascript',
                     tag: 'javascript',
+                    tagSlug: 'javascript',
                     taggedPages: []
                 }
             }
@@ -164,8 +171,56 @@ describe('Tag templates', () => {
             expect($('.tag-overview__image').attr('src')).toBe('/images/js-logo.jpg')
         })
 
+        // A multi-word tag's image key follows the slug, so that the config
+        // key is writable at all — `tag_overview_web development_image` is not.
+        it('looks the tag-specific image up by slug', () => {
+            const templatePath = template('pages/tag-overview.pug')
+            const mockData = {
+                app: {
+                    lang: 'en',
+                    tagsConfig: {
+                        'tag_overview_web-development_image': '/images/webdev.jpg',
+                        tag_overview_default_image: '/images/default-tag.jpg'
+                    }
+                },
+                meta: {
+                    title: 'web development',
+                    tag: 'web development',
+                    tagSlug: 'web-development',
+                    taggedPages: []
+                }
+            }
+
+            const html = pug.renderFile(templatePath, mockData)
+            const $ = load(html)
+
+            expect($('.tag-overview__image').attr('src')).toBe('/images/webdev.jpg')
+        })
+
+        // 2.x read `app.tagsConfig[...]` unguarded, so a site that published
+        // this template and had no `config/tags.yaml` failed the whole build
+        // with "Cannot read properties of undefined".
+        it('renders without an app.tagsConfig instead of throwing', () => {
+            const templatePath = template('pages/tag-overview.pug')
+            const mockData = {
+                app: { lang: 'en' },
+                meta: {
+                    title: 'javascript',
+                    tag: 'javascript',
+                    tagSlug: 'javascript',
+                    taggedPages: []
+                }
+            }
+
+            const html = pug.renderFile(templatePath, mockData)
+            const $ = load(html)
+
+            expect($('.tag-overview__title').text().trim()).toBe('javascript')
+            expect($('.tag-overview__image')).toHaveLength(0)
+        })
+
         it('handles empty tagged pages gracefully', () => {
-            const templatePath = path.resolve('views/pages/tag-overview.pug')
+            const templatePath = template('pages/tag-overview.pug')
             const mockData = {
                 app: {
                     lang: 'en',

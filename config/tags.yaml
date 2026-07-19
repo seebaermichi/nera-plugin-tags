@@ -1,12 +1,18 @@
-# all optional, the values given here are the defaults
+# All optional; the values given here are the defaults.
+# This file documents the configuration — copy it to your own project's
+# config/tags.yaml. The copy shipped inside the package is never read.
 meta_property_name: tags
 tag_overview_path: '/tags'
 tag_separator: ','
 tag_overview_layout: pages/default.pug
+
+# Merged into every generated tag page's meta. A `layout` here wins over
+# `tag_overview_layout` above.
 tag_overview_meta:
   keywords: some, tag, related, keys
   description: This is an overview page
 
-# examples
+# Examples. Tag-specific keys are looked up by the tag's *slug*, so the tag
+# `web development` is configured as `tag_overview_web-development_image`.
 tag_overview_default_image: /img/banner/banner.jpg
-tag_overview_website_image: /img/banner/website-banner.jpg
+tag_overview_web-development_image: /img/banner/website-banner.jpg

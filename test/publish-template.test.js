@@ -12,7 +12,13 @@ beforeEach(() => {
     // Clean test workspace
     fs.rmSync(TEST_ROOT, { recursive: true, force: true })
     fs.mkdirSync(TEST_ROOT, { recursive: true })
-    fs.writeFileSync(DUMMY_PACKAGE, JSON.stringify({ name: 'dummy' }, null, 2))
+    // Shaped like a real Nera project rather than named 'dummy': the bin no
+    // longer passes an `expectedPackageName` override, so what is exercised
+    // here is the same validation a user's site goes through.
+    fs.writeFileSync(DUMMY_PACKAGE, JSON.stringify({ name: 'my-site' }, null, 2))
+    fs.mkdirSync(path.join(TEST_ROOT, 'config'), { recursive: true })
+    fs.writeFileSync(path.join(TEST_ROOT, 'config/app.yaml'), 'lang: en\n')
+    fs.mkdirSync(path.join(TEST_ROOT, 'pages'), { recursive: true })
 })
 
 afterEach(() => {
@@ -57,9 +63,28 @@ describe('publish-template script', () => {
         expect(result).toContain('Skipping')
     })
 
+    it('overwrites existing templates when --force is passed', () => {
+        fs.mkdirSync(path.join(TEMPLATES_DEST, 'pages'), { recursive: true })
+        fs.writeFileSync(
+            path.join(TEMPLATES_DEST, 'pages/tag-overview.pug'),
+            'p edited by the user\n'
+        )
+
+        const result = execSync(`cd ${TEST_ROOT} && node ${SCRIPT_PATH} --force`, {
+            encoding: 'utf-8',
+        })
+
+        expect(result).toContain('Templates copied to:')
+        expect(
+            fs.readFileSync(path.join(TEMPLATES_DEST, 'pages/tag-overview.pug'), 'utf-8')
+        ).toContain('tag-overview__title')
+    })
+
     it('fails when not run from a Nera project', () => {
-        // Remove the package.json to simulate non-Nera project
+        // Strip every signal validateNeraProject looks for
         fs.unlinkSync(DUMMY_PACKAGE)
+        fs.rmSync(path.join(TEST_ROOT, 'config'), { recursive: true, force: true })
+        fs.rmSync(path.join(TEST_ROOT, 'pages'), { recursive: true, force: true })
 
         // Run the script and expect it to fail
         expect(() => {

@@ -1,17 +1,28 @@
+-
+    // `app.tagsConfig` is provided by getAppData, but a layout that renders
+    // this template outside a tag page has no reason to have it. Reading
+    // through it unguarded used to fail the whole build.
+    const tagsConfig = app.tagsConfig || {}
+    const taggedPages = meta.taggedPages || []
+    // Keyed on the slug, with the raw tag name accepted as a fallback so a
+    // config written before slugs existed keeps working for single-word tags.
+    const tagImage = tagsConfig[`tag_overview_${ meta.tagSlug }_image`] || tagsConfig[`tag_overview_${ meta.tag }_image`] || tagsConfig.tag_overview_default_image
+
 section.tag-overview
     header.tag-overview__header
         h1.tag-overview__title #{ meta.title }
 
-        if app.tagsConfig['tag_overview_' + meta.tag + '_image'] || app.tagsConfig.tag_overview_default_image
-            img.tag-overview__image(src=`${ app.tagsConfig['tag_overview_' + meta.tag + '_image'] || app.tagsConfig.tag_overview_default_image }` alt='')
+        if tagImage
+            img.tag-overview__image(src=`${ tagImage }` alt='')
 
-    if meta.taggedPages.length > 0
+    if taggedPages.length > 0
         section.tag-overview__content
-            each page, index in meta.taggedPages
+            each page in taggedPages
                 article.tag-overview__item
                     h2.tag-overview__item-title #{ page.meta.title }
 
-                    time.tag-overview__item-date #{ page.meta.createdAt.toLocaleString(app.lang) }
+                    if page.meta.createdAt
+                        time.tag-overview__item-date #{ new Date(page.meta.createdAt).toLocaleString(app.lang) }
 
                     p.tag-overview__item-description #{ page.meta.description }
 
