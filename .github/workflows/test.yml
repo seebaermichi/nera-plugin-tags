@@ -10,8 +10,13 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
+      # The package supports Node >= 18, but the *test* toolchain does not:
+      # cheerio pulls in undici, which needs a global `File` (Node 20+). That
+      # is a devDependency, so consumers on 18 are unaffected — but it means
+      # 18 cannot be exercised here. Revisit if engines ever rises to >= 20.
       matrix:
-        node-version: [18, 20]
+        node-version: [20, 22]
 
     steps:
       - name: Checkout repository

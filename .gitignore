@@ -1,2 +1,5 @@
 node_modules
 .vscode/
+
+# npm auth — never commit credentials
+.npmrc
