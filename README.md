@@ -1,5 +1,8 @@
 # @nera-static/plugin-tags
 
+[![Test](https://github.com/seebaermichi/nera-plugin-tags/actions/workflows/test.yml/badge.svg)](https://github.com/seebaermichi/nera-plugin-tags/actions/workflows/test.yml)
+[![npm version](https://img.shields.io/npm/v/@nera-static/plugin-tags)](https://www.npmjs.com/package/@nera-static/plugin-tags)
+
 A plugin for the [Nera](https://github.com/seebaermichi/nera) static site generator that creates tag clouds, tag links, and tag overview pages from page tags. Perfect for content organization, taxonomy management, and content discovery.
 
 ## ✨ Features
