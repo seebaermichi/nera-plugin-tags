@@ -1,35 +1,36 @@
-name: 🧪 Run Tests
+name: Test
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    push:
+        branches: [main, master]
+    pull_request:
+        branches: [main, master]
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      # The package supports Node >= 18, but the *test* toolchain does not:
-      # cheerio pulls in undici, which needs a global `File` (Node 20+). That
-      # is a devDependency, so consumers on 18 are unaffected — but it means
-      # 18 cannot be exercised here. Revisit if engines ever rises to >= 20.
-      matrix:
-        node-version: [20, 22]
+    test:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+        strategy:
+            fail-fast: false
+            matrix:
+                # Node 18 is deliberately absent: cheerio pulls in `undici`,
+                # which needs a global `File` (Node 20+).
+                node-version: [20, 22]
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: npm install
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: 'npm'
 
-      - name: Run tests
-        run: npm test
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run linter
+              run: npm run lint
+
+            - name: Run tests
+              run: npx vitest run
