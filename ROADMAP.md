@@ -61,3 +61,46 @@ scoped — so no BEM/class changes, keeping this out of major-bump territory.
 **Acceptance.** A trilingual site produces separate tag clouds and tag pages per
 language, with chips linking within the same language; a single-language site
 (no `group_by_lang`, or no `meta.lang`) behaves exactly as it does today.
+
+### Context added 2026-07-21
+
+Three things changed after the proposal above was written. They do not alter the
+design, but the reference site no longer matches the defaults the text assumes.
+
+**The reference site moved its tag pages.** `nera-website` — the trilingual
+dogfood site this proposal came from — now sets
+`tag_overview_path: '/tutorials/tags'`, so its overviews are generated at
+`/tutorials/tags/<slug>.html`, not at the default `/tags/<slug>.html` the
+sections above describe. Anything asserting URLs against that site must account
+for the configured prefix, and the language segment has to compose with it:
+presumably `/de/tutorials/tags/<slug>.html`. Where the language segment belongs
+relative to a configured `tag_overview_path` is an open question the proposal
+does not yet answer — prefixing the whole configured path is the obvious
+reading, but it is a decision, not a given.
+
+**The site's tag pages are currently English-rooted.** All 12 generated
+overviews live under the unprefixed path, so a German reader following a tag
+chip lands on an English-rooted page listing pages from every language. That is
+the concrete symptom motivating this work, and the thing to verify is fixed.
+
+**Navigation now depends on where these pages sit.**
+`@nera-static/plugin-navigation` 2.4.1 marks a nav entry with the active-path
+class when the current page sits anywhere inside that entry's section, at any
+depth (2.4.0 and earlier only matched one level down). That is what makes
+`/tutorials/tags/links.html` highlight *Tutorials*. Per-language pages will sit
+at a different depth again, so re-check that highlighting still holds once the
+paths change — a page at `/de/tutorials/tags/<slug>.html` needs the German
+Tutorials entry marked, which also requires the host site to pass its language
+prefix as the mixin's `rootPath` argument.
+
+**Working agreement.** Develop and validate inside this repo: the existing
+integration tests build a throwaway project in a temp directory (see how
+`plugin-navigation` does it), which is enough to prove per-language grouping
+without touching `nera-website`. Wiring a new version into that site — its
+`config/tags.yaml`, its vendored templates under
+`views/vendor/plugin-tags/`, its `package.json` — is a separate follow-up step,
+so two streams of work do not edit the same files at once.
+
+Note that `publishTemplates` skips a `views/vendor/plugin-tags/` that already
+exists, so any site that published templates before will need
+`npx nera-tags --force` to pick up changed partials.
