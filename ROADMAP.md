@@ -5,7 +5,13 @@ with enough detail to pick up later.
 
 ## Per-language tags and tag pages
 
-**Status:** proposed · **Filed:** 2026-07-21 · **Likely semver:** minor (opt-in)
+**Status:** implemented in 3.2.0 (2026-07-21) · **Filed:** 2026-07-21 ·
+**Semver:** minor (opt-in)
+
+> Shipped. The sections below are kept as the design record; see
+> "Resolved 2026-07-21" at the end for what was actually built, including the
+> two open questions' answers and one behaviour the proposal did not
+> anticipate. Wiring it into `nera-website` is still outstanding.
 
 **Motivation.** Surfaced while building a trilingual site (English/German/Spanish)
 with Nera. The plugin currently treats tags as one global namespace, so tags from
@@ -104,3 +110,58 @@ so two streams of work do not edit the same files at once.
 Note that `publishTemplates` skips a `views/vendor/plugin-tags/` that already
 exists, so any site that published templates before will need
 `npx nera-tags --force` to pick up changed partials.
+
+### Resolved 2026-07-21 — shipped in 3.2.0
+
+Implemented behind `group_by_lang: false`, so nothing changes for a site that
+does not opt in. `test/group-by-lang.test.js` covers it against a trilingual
+fixture, including both modes and the shipped partials.
+
+**Open question — where the language segment goes.** Decided: it prefixes the
+**whole** configured `tag_overview_path`, so the reference site's overviews
+land at `/de/tutorials/tags/<slug>.html`. This is what keeps tag pages inside
+the same language tree as the rest of the site, which is also what navigation's
+active-path matching needs. The segment is the page's `lang` itself — the same
+code the site already uses for its directories (`pages/de/…`) — and the default
+language is left unprefixed, with `prefix_default_lang: true` opting into
+`/en/…` for sites that give every language a directory.
+
+A configurable per-language segment (`lang_path_prefixes`, floated in the open
+questions above as a possible `lang_path_prefix` hint) was built and then
+**dropped before release**. No site can serve two languages from one segment,
+so its only distinguishing feature — pointing two languages at one path — was
+not a use case, and the reference site's `lang` values already equal its
+directory names. Add it later if a site with locale-style codes (`de-DE` served
+from `/de/`) actually turns up.
+
+**Open question — image lookup keys.** Decided: yes, per-language, with
+fallback. `tag_overview_<lang>_<slug>_image` → `tag_overview_<slug>_image` →
+`tag_overview_<tag>_image` → `tag_overview_<lang>_default_image` →
+`tag_overview_default_image`.
+
+**Cloud shape.** `app.tagCloud` keeps its flat-array shape (default language
+when grouping, everything when not), `app.tagCloudByLang` is the keyed map, and
+each page carries a `meta.tagCloud` already scoped to its language. The shipped
+`tag-cloud` partial reads `meta.tagCloud || app.tagCloud`, so one partial
+serves both modes with no BEM or markup change — which is what kept this a
+minor bump.
+
+**No new frontmatter key.** Pages already carry `lang:` — the site sets it on
+all 63 of them — so the plugin reads `meta.lang` and falls back to `app.lang`.
+A tags-specific key would be a second source of truth for the same fact, to be
+kept in sync by hand in every file.
+
+**Grouping is keyed by language, and that is the whole model.** An intermediate
+implementation keyed it by *resolved path* instead, to guarantee two languages
+could never emit two tag pages to one output file. Once the segment became the
+language code that was unreachable except through malformed frontmatter, so the
+guard, its warning and its helpers were removed — about 70 lines that made the
+code say something more complicated than the feature is. `getPagesByLang` is
+now 15 lines, and single-namespace mode is the same function with one group.
+
+**Still outstanding.** Wiring this into `nera-website` — its `config/tags.yaml`
+(`group_by_lang: true`), a `npx nera-tags --force` to refresh
+`views/vendor/plugin-tags/`, and the `package.json` bump to 3.2.0 — plus
+re-checking that `/de/tutorials/tags/<slug>.html` still highlights the German
+*Tutorials* nav entry, which needs the site to pass its language prefix as the
+navigation mixin's `rootPath`.

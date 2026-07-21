@@ -4,9 +4,11 @@
     // through it unguarded used to fail the whole build.
     const tagsConfig = app.tagsConfig || {}
     const taggedPages = meta.taggedPages || []
-    // Keyed on the slug, with the raw tag name accepted as a fallback so a
-    // config written before slugs existed keeps working for single-word tags.
-    const tagImage = tagsConfig[`tag_overview_${ meta.tagSlug }_image`] || tagsConfig[`tag_overview_${ meta.tag }_image`] || tagsConfig.tag_overview_default_image
+    const lang = meta.lang || app.lang
+    // Keyed on the slug, most specific first: a per-language key, then the
+    // language-agnostic one, then the raw tag name — accepted as a fallback so
+    // a config written before slugs existed keeps working for single-word tags.
+    const tagImage = tagsConfig[`tag_overview_${ lang }_${ meta.tagSlug }_image`] || tagsConfig[`tag_overview_${ meta.tagSlug }_image`] || tagsConfig[`tag_overview_${ meta.tag }_image`] || tagsConfig[`tag_overview_${ lang }_default_image`] || tagsConfig.tag_overview_default_image
 
 section.tag-overview
     header.tag-overview__header
@@ -22,7 +24,7 @@ section.tag-overview
                     h2.tag-overview__item-title #{ page.meta.title }
 
                     if page.meta.createdAt
-                        time.tag-overview__item-date #{ new Date(page.meta.createdAt).toLocaleString(app.lang) }
+                        time.tag-overview__item-date #{ new Date(page.meta.createdAt).toLocaleString(lang) }
 
                     p.tag-overview__item-description #{ page.meta.description }
 

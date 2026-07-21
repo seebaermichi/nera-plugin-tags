@@ -6,6 +6,16 @@ tag_overview_path: '/tags'
 tag_separator: ','
 tag_overview_layout: pages/default.pug
 
+# Multilingual sites: collect tags per `meta.lang` instead of in one global
+# namespace. Off means today's behaviour, unchanged.
+group_by_lang: false
+
+# Only read when group_by_lang is true. A page's `lang` becomes a URL segment
+# in front of the whole tag_overview_path, so `de` + `/tutorials/tags` gives
+# `/de/tutorials/tags/<slug>.html` — the same layout the site's own pages use.
+# The default language (app.lang) is left unprefixed unless this is true.
+prefix_default_lang: false
+
 # Merged into every generated tag page's meta. A `layout` here wins over
 # `tag_overview_layout` above.
 tag_overview_meta:
@@ -16,3 +26,7 @@ tag_overview_meta:
 # `web development` is configured as `tag_overview_web-development_image`.
 tag_overview_default_image: /img/banner/banner.jpg
 tag_overview_web-development_image: /img/banner/website-banner.jpg
+
+# A language-qualified key wins over the plain one on that language's pages.
+# tag_overview_de_web-development_image: /img/banner/webseite-banner.jpg
+# tag_overview_de_default_image: /img/banner/banner-de.jpg

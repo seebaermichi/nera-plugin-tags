@@ -12,6 +12,7 @@ A plugin for the [Nera](https://github.com/seebaermichi/nera) static site genera
 - Clickable tag links for each page
 - Individual tag overview pages with all tagged content
 - Access all tag data globally via `app.tagCloud` and `meta.tagLinks`
+- Optional per-language tags, tag pages and clouds for multilingual sites
 - Includes ready-to-use Pug templates with BEM CSS methodology
 - Template publishing system for easy customization
 - Configurable tag separators, paths, and layouts
@@ -44,6 +45,12 @@ tag_separator: ','
 # Base path for tag overview pages (default: '/tags')
 tag_overview_path: '/tags'
 
+# Multilingual sites: one tag namespace per language (default: false)
+group_by_lang: false
+
+# Only read when group_by_lang is true (default: false)
+prefix_default_lang: false
+
 # Layout template for tag overview pages (default: 'pages/default.pug')
 tag_overview_layout: 'pages/default.pug'
 
@@ -61,6 +68,10 @@ tag_overview_web-development_image: '/images/tags/webdev.jpg'
 These keys are exposed to templates as `app.tagsConfig`. The lookup uses the
 tag's slug (see [Generated URLs](#-generated-urls)), so a multi-word tag such
 as `web development` is configured as `tag_overview_web-development_image`.
+A language-qualified key — `tag_overview_de_web-development_image`, or
+`tag_overview_de_default_image` — wins over the plain one on that language's
+pages, which is only useful together with
+[per-language tags](#-per-language-tags).
 
 ## 🧩 Usage
 
@@ -200,6 +211,59 @@ section.tag-overview
 ]
 ```
 
+## 🌍 Per-language tags
+
+By default every page on the site shares one tag namespace. On a multilingual
+site that merges languages: one `/tags/links.html` lists English, German and
+Spanish pages together, and the tag cloud mixes all three.
+
+Enable `group_by_lang` to give each language its own tags, tag pages and cloud:
+
+```yaml
+group_by_lang: true
+```
+
+A page's language is `meta.lang`; pages without one belong to the site's
+default language (`app.lang` from `config/app.yaml`).
+
+### URLs
+
+The URL segment is the page's `lang`, and it prefixes the **whole**
+`tag_overview_path` — so tag pages sit inside the same language tree as the
+rest of the site, exactly where `pages/de/…` already puts your German content.
+The default language stays where it is today:
+
+| Config | `en` (default) | `de` |
+|---|---|---|
+| `tag_overview_path: '/tags'` | `/tags/links.html` | `/de/tags/links.html` |
+| `tag_overview_path: '/tutorials/tags'` | `/tutorials/tags/links.html` | `/de/tutorials/tags/links.html` |
+| `prefix_default_lang: true` | `/en/tags/links.html` | `/de/tags/links.html` |
+
+Use `prefix_default_lang` if every language on your site lives under its own
+directory; leave it off if one language is served from the root.
+
+### What templates get
+
+- `meta.tagLinks` on a page points at that page's own language.
+- `meta.tagCloud` is the current page's language cloud. It exists **only**
+  when `group_by_lang` is on; the shipped `tag-cloud` partial falls back to
+  `app.tagCloud`, so both modes render through the same markup.
+- `app.tagCloudByLang` is `{ en: [...], de: [...], es: [...] }`.
+- `app.tagCloud` keeps its existing flat-array shape and holds the default
+  language, so a template that never learned about languages still works.
+- Generated tag pages carry `meta.lang`, and their `meta.taggedPages` lists
+  only pages of that language.
+
+```pug
+// Language-aware by construction — no change needed in your own markup
+each tag in (meta.tagCloud || app.tagCloud)
+    a.tag-cloud__item(href=tag.href) #{tag.name}
+```
+
+If your site published templates before upgrading, re-run
+`npx nera-tags --force` to pick up the updated `tag-cloud` and `tag-overview`
+partials.
+
 ## 🛠️ Template Publishing
 
 Use the default templates provided by the plugin:
@@ -325,6 +389,8 @@ Tests use [Vitest](https://vitest.dev) and cover:
 - Tag cloud generation, sorting, slugging and case folding
 - Tag links creation for pages
 - Generated page metadata against the shape the generator writes files from
+- Per-language grouping: URLs, scoped clouds, chips and overviews, plus the
+  unchanged single-namespace behaviour
 - Template rendering, including the shipped templates fed with real plugin output
 - Template publishing, with and without `--force`
 

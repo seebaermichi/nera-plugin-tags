@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-07-21
+
+### Added
+
+-   `group_by_lang` (default `false`): collect tags per `meta.lang` instead of
+    in one global namespace. Each language gets its own tag pages, its own
+    cloud, and tag chips that link within the same language. Pages without
+    `meta.lang` belong to the site's default language (`app.lang`)
+-   `prefix_default_lang` (default `false`), which controls whether the default
+    language's tag pages get a URL segment of their own. Every other language
+    is prefixed with its `lang` in front of the whole `tag_overview_path`, so
+    `de` + `/tutorials/tags` gives `/de/tutorials/tags/<slug>.html`
+-   `app.tagCloudByLang`, a `{ <lang>: [...] }` map of every language's cloud.
+    Present in both modes; with grouping off it holds the single namespace
+    under the default language key
+-   `meta.tagCloud` on every page, scoped to that page's language. Only added
+    when `group_by_lang` is enabled
+-   `meta.lang` on generated tag pages, so they render in their own language
+-   language-qualified tag image config keys —
+    `tag_overview_<lang>_<slug>_image` and `tag_overview_<lang>_default_image`
+    — which take precedence over the language-agnostic keys
+
+### Changed
+
+-   the shipped `partials/tag-cloud.pug` renders `meta.tagCloud` when present
+    and falls back to `app.tagCloud`, and `pages/tag-overview.pug` prefers a
+    language-qualified image key and formats dates in the page's own language.
+    No markup or BEM class changed, but sites that published templates before
+    need `npx nera-tags --force` to pick these up
+-   `app.tagCloud` is unchanged with grouping off; with grouping on it holds
+    the default language's cloud, keeping its flat-array shape
+
+
 ## [3.1.0] - 2026-07-21
 
 ### Changed
