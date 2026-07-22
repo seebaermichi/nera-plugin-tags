@@ -1,6 +1,6 @@
 {
     "name": "@nera-static/plugin-tags",
-    "version": "3.2.1",
+    "version": "3.2.2",
     "description": "A plugin for Nera static site generator to create tag clouds, tag links and tag overview pages. Perfect for content organization and taxonomy management.",
     "main": "index.js",
     "scripts": {

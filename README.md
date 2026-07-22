@@ -19,7 +19,8 @@ A plugin for the [Nera](https://github.com/seebaermichi/nera) static site genera
 - Case-folded, slugified tag URLs — `CSS` and `css` share one page
 - Tags may be written as a separated string or a YAML list
 - Lightweight and zero-runtime overhead
-- Full compatibility with Nera v4.1.0+
+- Works with Nera v4.3.0+ as documented here (the plugin itself needs only the
+  4.x baseline — see [Compatibility](#-compatibility))
 
 ## 🚀 Installation
 
@@ -33,7 +34,9 @@ Nera will automatically detect the plugin and apply tag processing during the bu
 
 ## ⚙️ Configuration
 
-The plugin uses `config/tags.yaml` to configure tag behavior:
+The plugin uses `config/tags.yaml` to configure tag behavior. **Every key is
+optional and the file itself is too** — the values below are the defaults, and
+with no `config/tags.yaml` at all the plugin runs exactly as shown here:
 
 ```yaml
 # Meta property name containing tags (default: 'tags')
@@ -65,12 +68,29 @@ tag_overview_javascript_image: '/images/tags/js-logo.jpg'
 tag_overview_web-development_image: '/images/tags/webdev.jpg'
 ```
 
-These keys are exposed to templates as `app.tagsConfig`. The lookup uses the
-tag's slug (see [Generated URLs](#-generated-urls)), so a multi-word tag such
-as `web development` is configured as `tag_overview_web-development_image`.
-A language-qualified key — `tag_overview_de_web-development_image`, or
-`tag_overview_de_default_image` — wins over the plain one on that language's
-pages, which is only useful together with
+A `layout` inside `tag_overview_meta` **wins over** `tag_overview_layout`. Set
+one or the other; the block above sets both only to show where each goes.
+
+### Tag images
+
+The `tag_overview_*_image` keys are the one part of this file the plugin does
+not read itself. It forwards the whole config to templates as `app.tagsConfig`,
+and the shipped `pages/tag-overview.pug` is what resolves the image — so if you
+replace that template with your own markup, these keys do nothing until your
+template reads `app.tagsConfig` too.
+
+The lookup uses the tag's slug (see [Generated Output](#-generated-output)), so a
+multi-word tag such as `web development` is configured as
+`tag_overview_web-development_image`. Keys are tried most specific first:
+
+1. `tag_overview_<lang>_<slug>_image`
+2. `tag_overview_<slug>_image`
+3. `tag_overview_<tag>_image` — the un-slugged tag name, kept as a fallback so
+   configs written before 3.0.0 keep working for single-word tags
+4. `tag_overview_<lang>_default_image`
+5. `tag_overview_default_image`
+
+The language-qualified forms are only useful together with
 [per-language tags](#-per-language-tags).
 
 ## 🧩 Usage
@@ -96,23 +116,21 @@ A YAML list works just as well, and avoids the separator entirely:
 ```yaml
 ---
 title: CSS Grid Layout Guide
+description: Master CSS Grid for modern web layouts
 tags:
     - css
+    - layout
     - web development
----
-```
-
-```yaml
----
-title: CSS Grid Layout Guide
-description: Master CSS Grid for modern web layouts
-tags: css, layout, web development, design
 ---
 
 # CSS Grid Layout Guide
 
 More content...
 ```
+
+Entries that are neither a string nor a number — a nested YAML mapping, say —
+are skipped with a warning rather than taken down the build, as is any tag with
+no URL-safe characters at all (see [Generated Output](#-generated-output)).
 
 ### Access in your templates
 
@@ -163,6 +181,21 @@ section.tag-overview
                     a.tag-overview__item-link(href=page.meta.href) Read more
 ```
 
+Generated tag pages carry more than `taggedPages`, and a layout of your own can
+read all of it:
+
+| Key | Value |
+|---|---|
+| `meta.tag` | the tag exactly as authored, e.g. `web development` |
+| `meta.tagSlug` | its URL token, e.g. `web-development` — this is what the image config keys are looked up by |
+| `meta.title` | same as `meta.tag`, so a shared layout's `h1` works unchanged |
+| `meta.taggedPages` | the pages carrying this tag, newest first |
+| `meta.lang` | the page's language — **only** when `group_by_lang` is on |
+| `meta.href` / `dirname` / `filename` / `fullPath` | the usual generator page keys, derived from the tag's href |
+
+`meta.tagLinks` is `[]` on a generated tag page, so including the `tag-links`
+partial in a shared layout renders nothing there rather than failing.
+
 ### Available data structure
 
 **Tag cloud items (`app.tagCloud`)**:
@@ -198,9 +231,15 @@ section.tag-overview
 ```
 
 **Tag overview page data (`meta.taggedPages`)**:
+
+Entries are the page objects themselves, so `content` — the page's rendered
+HTML — is available alongside `meta` if you want an excerpt. The list is sorted
+by `createdAt`, newest first.
+
 ```javascript
 [
     {
+        content: "<p>Rendered page HTML…</p>",
         meta: {
             title: "Getting Started with JavaScript",
             description: "Learn the basics...",
@@ -248,7 +287,9 @@ directory; leave it off if one language is served from the root.
 - `meta.tagCloud` is the current page's language cloud. It exists **only**
   when `group_by_lang` is on; the shipped `tag-cloud` partial falls back to
   `app.tagCloud`, so both modes render through the same markup.
-- `app.tagCloudByLang` is `{ en: [...], de: [...], es: [...] }`.
+- `app.tagCloudByLang` is `{ en: [...], de: [...], es: [...] }`. Unlike
+  `meta.tagCloud`, it is written in **both** modes — with grouping off it holds
+  the single namespace under the default language's key.
 - `app.tagCloud` keeps its existing flat-array shape and holds the default
   language, so a template that never learned about languages still works.
 - Generated tag pages carry `meta.lang`, and their `meta.taggedPages` lists
@@ -351,7 +392,12 @@ The plugin uses BEM CSS methodology with the following classes:
 
 You can customize the styling by overriding these classes in your CSS.
 
-## 📊 Generated URLs
+**These class names are a public contract.** You style them from your own CSS,
+so renaming one here is a breaking change and ships as a **major** version.
+
+## 📊 Generated Output
+
+### URLs
 
 Tag overview pages are automatically generated with clean URLs:
 
@@ -376,15 +422,53 @@ alphabetically first variant found, so results do not depend on the order
 pages happen to be read in. A tag with no URL-safe characters at all (`+++`)
 is skipped with a warning rather than generating an unreachable page.
 
+### Markup
+
+What the shipped templates emit, for a site with two pages tagged
+`javascript, web development` and `css, web development`:
+
+```html
+<!-- partials/tag-cloud.pug -->
+<section class="tag-cloud"><a class="tag-cloud__item" href="/tags/css.html">css</a><a class="tag-cloud__item" href="/tags/javascript.html">javascript</a><a class="tag-cloud__item" href="/tags/web-development.html">web development</a></section>
+
+<!-- partials/tag-links.pug, on the CSS page -->
+<section class="tag-links"><a class="tag-links__item" href="/tags/css.html">css</a><a class="tag-links__item" href="/tags/web-development.html">web development</a></section>
+```
+
+```html
+<!-- pages/tag-overview.pug, rendered at /tags/web-development.html -->
+<section class="tag-overview">
+  <header class="tag-overview__header">
+    <h1 class="tag-overview__title">web development</h1>
+  </header>
+  <section class="tag-overview__content">
+    <article class="tag-overview__item">
+      <h2 class="tag-overview__item-title">CSS Grid Layout Guide</h2><time class="tag-overview__item-date">2/3/2026, 12:00:00 AM</time>
+      <p class="tag-overview__item-description">Master CSS Grid for modern web layouts</p><a class="tag-overview__item-link" href="/articles/css-grid.html">Read more</a>
+    </article>
+    <article class="tag-overview__item">
+      <h2 class="tag-overview__item-title">Getting Started with JavaScript</h2><time class="tag-overview__item-date">1/2/2026, 12:00:00 AM</time>
+      <p class="tag-overview__item-description">Learn the basics of JavaScript programming</p><a class="tag-overview__item-link" href="/articles/js-basics.html">Read more</a>
+    </article>
+  </section>
+</section>
+```
+
+Two things to expect rather than be surprised by: the dates come from
+`toLocaleString(meta.lang || app.lang)`, so their exact formatting follows the
+build machine's locale and time zone; and `.tag-overview__image` only appears
+when a [tag image](#tag-images) is configured.
+
 ## 🧪 Development
 
 ```bash
 npm install
-npm test
+npx vitest run
 npm run lint
 ```
 
-Tests use [Vitest](https://vitest.dev) and cover:
+`npm test` starts Vitest in **watch** mode; use `npx vitest run` for a single
+pass. Tests use [Vitest](https://vitest.dev) and cover:
 
 - Tag cloud generation, sorting, slugging and case folding
 - Tag links creation for pages
@@ -393,10 +477,26 @@ Tests use [Vitest](https://vitest.dev) and cover:
   unchanged single-namespace behaviour
 - Template rendering, including the shipped templates fed with real plugin output
 - Template publishing, with and without `--force`
+- That the markup in [Generated Output](#-generated-output) still matches what
+  the shipped templates render, so the README cannot quietly go stale
+
+## 🤝 Contributing
+
+Issues and pull requests are welcome. See the
+[Nera contributing guide](https://github.com/seebaermichi/nera/blob/main/CONTRIBUTING.md)
+for plugin development, the hook contract, and local setup.
+
+For this repo specifically:
+
+- `npx vitest run` and `npm run lint` must pass (`npm test` is watch mode).
+- Bump the version and update `CHANGELOG.md` **in the same commit** as the change.
+- Template markup and BEM class names are a **public contract** — users style
+  them from their own CSS, so changing one is a **major** bump.
+- Releases publish from CI on a pushed `v*` tag. Never run `npm publish`.
 
 ## 🧑‍💻 Author
 
-Michael Becker
+Michael Becker  
 [https://github.com/seebaermichi](https://github.com/seebaermichi)
 
 ## 🔗 Links
@@ -407,7 +507,13 @@ Michael Becker
 
 ## 🧩 Compatibility
 
-- **Nera**: v4.1.0+
+- **Nera**: v4.3.0+ for the root-absolute `include /vendor/plugin-tags/…` shown
+  in [Template Publishing](#️-template-publishing), which needs the Pug
+  `basedir` the generator began setting in 4.3.0; the
+  [Plugin ordering](#-plugin-ordering) advice needs v4.2.0+. The plugin itself
+  needs nothing above the 4.x baseline — on v4.1.x–v4.2.x use the relative form
+  `include ../vendor/plugin-tags/partials/tag-cloud` from a layout in
+  `views/layouts/`.
 - **Node.js**: >= 20.0.0
 - **Plugin API**: Uses `getAppData()` and `getMetaData()` for tag processing
 - **`@nera-static/plugin-utils`**: ^1.4.0 — `getConfig()` and `slugify()`
