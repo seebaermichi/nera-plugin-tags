@@ -408,9 +408,9 @@ Michael Becker
 ## 🧩 Compatibility
 
 - **Nera**: v4.1.0+
-- **Node.js**: >= 18
+- **Node.js**: >= 20.0.0
 - **Plugin API**: Uses `getAppData()` and `getMetaData()` for tag processing
-- **`@nera-static/plugin-utils`**: ^1.2.0
+- **`@nera-static/plugin-utils`**: ^1.4.0 — `getConfig()` and `slugify()`
 
 ## 📦 License
 

@@ -1,5 +1,5 @@
 import path from 'path'
-import { getConfig } from '@nera-static/plugin-utils'
+import { getConfig, slugify } from '@nera-static/plugin-utils'
 
 // Resolved per call rather than at module scope: `process.cwd()` is captured
 // at import time otherwise, which is both untestable and wrong for any host
@@ -77,19 +77,18 @@ function getOverviewPathForLang(lang, options) {
  * in case or punctuation therefore share one page — which is the point: `CSS`
  * and `css` are the same tag to a human.
  *
+ * As of 3.2.1 this delegates to `slugify` in `@nera-static/plugin-utils`, which
+ * is the same algorithm this function used to implement inline — output is
+ * unchanged. It stays exported because it is part of this plugin's public API,
+ * and because naming the rule at the call site is worth a one-line wrapper. Any
+ * change to the rule now belongs in `plugin-utils`, where `plugin-one-page`
+ * shares it.
+ *
  * @param {string} tag - Trimmed tag as authored
  * @returns {string} - URL-safe slug, or '' if nothing usable remains
  */
 export function slugifyTag(tag) {
-    return String(tag)
-        // ß has no NFKD decomposition, so it would otherwise become a hyphen
-        // mid-word. Its expansion is the same in every language that uses it.
-        .replace(/ß/g, 'ss')
-        .normalize('NFKD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
+    return slugify(tag)
 }
 
 /**

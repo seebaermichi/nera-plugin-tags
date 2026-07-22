@@ -5,7 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.2.0] - 2026-07-21
+## [3.2.1] - 2026-07-22
+
+### Changed
+
+-   `slugifyTag` now delegates to `slugify` in `@nera-static/plugin-utils`
+    rather than implementing the rule inline. **Output is unchanged** — it is
+    the same algorithm, moved: verified by diffing the two implementations over
+    20 000 randomised inputs drawn from an alphabet of ASCII, punctuation,
+    umlauts, `ß`, accented Latin and CJK, with zero differences, plus the
+    existing `slugifyTag` test table, which is unmodified and still passes
+
+    `plugin-one-page` had independently written the same helper and got it
+    wrong (`Über uns` → `-ber-uns`, an id that is not a valid CSS identifier).
+    One shared implementation means a future fix reaches both instead of only
+    the repo that noticed. `slugifyTag` stays exported — it is public API, and
+    naming the tag-slug rule at the call site is worth a one-line wrapper
+
+-   minimum `@nera-static/plugin-utils` raised to `^1.4.0`, which is where
+    `slugify` was added
+
+### Fixed
+
+-   README stated **Node.js >= 18**; the real floor is `>=20.0.0` per
+    `engines.node`, and has been since 3.0.0. Corrected along with the
+    `plugin-utils` range, which the Compatibility block now states accurately.
+    Folded in here rather than left for this repo's own README audit, since a
+    release was happening anyway
+
+### Notes
+
+No action needed on upgrade. Tag slugs, tag page URLs and `meta.tagSlug` are
+byte-identical to 3.2.0, so no `/tags/<slug>.html` moves and no link breaks.
 
 ### Added
 
