@@ -1,17 +1,24 @@
 # Roadmap — @nera-static/plugin-tags
 
-Planned/possible enhancements. Nothing here is committed work; items are ideas
-with enough detail to pick up later.
+Planned/possible enhancements — ideas with enough detail to pick up later.
+
+**Everything filed here so far has shipped.** The one item below is done and
+deployed end to end, so this file currently reads as a design record rather than
+a plan. Keep the record: the reasoning behind what was built, and the two
+alternatives that were built and then dropped, is why nobody has to re-derive
+them. New items go above the resolved one.
 
 ## Per-language tags and tag pages
 
-**Status:** implemented in 3.2.0 (2026-07-21) · **Filed:** 2026-07-21 ·
+**Status:** ✅ complete — implemented in 3.2.0 (2026-07-21), wired into
+`nera-website` and verified in its build (2026-07-22) · **Filed:** 2026-07-21 ·
 **Semver:** minor (opt-in)
 
-> Shipped. The sections below are kept as the design record; see
-> "Resolved 2026-07-21" at the end for what was actually built, including the
-> two open questions' answers and one behaviour the proposal did not
-> anticipate. Wiring it into `nera-website` is still outstanding.
+> Shipped and deployed. The sections below are kept as the design record; see
+> "Resolved 2026-07-21" for what was actually built, including the two open
+> questions' answers and one behaviour the proposal did not anticipate, and
+> "Closed out 2026-07-22" for the reference-site wiring and the documentation
+> gap that followed it.
 
 **Motivation.** Surfaced while building a trilingual site (English/German/Spanish)
 with Nera. The plugin currently treats tags as one global namespace, so tags from
@@ -159,9 +166,40 @@ guard, its warning and its helpers were removed — about 70 lines that made the
 code say something more complicated than the feature is. `getPagesByLang` is
 now 15 lines, and single-namespace mode is the same function with one group.
 
-**Still outstanding.** Wiring this into `nera-website` — its `config/tags.yaml`
-(`group_by_lang: true`), a `npx nera-tags --force` to refresh
-`views/vendor/plugin-tags/`, and the `package.json` bump to 3.2.0 — plus
-re-checking that `/de/tutorials/tags/<slug>.html` still highlights the German
-*Tutorials* nav entry, which needs the site to pass its language prefix as the
-navigation mixin's `rootPath`.
+### Closed out 2026-07-22
+
+**The reference-site wiring is done, and verified from the committed build** —
+not from the site's config alone, which only proves intent.
+`nera-website/config/tags.yaml` sets `group_by_lang: true` with
+`tag_overview_path: '/tutorials/tags'` and no `prefix_default_lang` (English is
+served from the root), and `views/vendor/plugin-tags/` has been refreshed. The
+build carries the same five tag pages under all three languages —
+`public/tutorials/tags/`, `public/de/tutorials/tags/`,
+`public/es/tutorials/tags/` — which is the acceptance criterion above.
+
+**The navigation re-check passed.** This was the open risk: per-language tag
+pages sit at a new depth, so the active-path highlighting had to be confirmed
+rather than assumed. On `/de/tutorials/tags/links.html` the German *Tutorials*
+entry renders as
+`class="nav__link nav__link--active-path" href="/de/tutorials/index.html"`, so
+the site is passing its language prefix as the mixin's `rootPath` correctly.
+
+**No version bump is owed.** The site depends on `^3.2.0`, which already
+resolves to the current 3.2.2; its lockfile still pins 3.2.0, so a routine
+`npm install` there picks up 3.2.1's shared-`slugify` refactor and 3.2.2's
+documentation. Slugs are byte-identical across all three, so no tag URL moves.
+
+**One gap this work left, now fixed in 3.2.2.** The feature shipped correctly
+and was documented in the README's per-language section, but the audit in
+`audit/readme/README-tags.md` found that `app.tagCloudByLang` was described as
+if it were gated on `group_by_lang` when the code writes it in both modes, and
+that `meta.tag` / `meta.tagSlug` on generated pages — which the per-language
+image lookup depends on — were documented nowhere at all. Worth noting as a
+pattern rather than a one-off: **the design record above was accurate and the
+user-facing docs still drifted**, because a feature's own section gets written
+and the shared data-contract section does not get revisited.
+
+**If a follow-up does turn up**, the two deliberately-dropped alternatives are
+`lang_path_prefixes` (a configurable per-language segment — see above for why it
+was cut) and path-keyed grouping. Neither should be rebuilt without a real site
+that needs it.
