@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.3] - 2026-10-08
+
+Documentation only — no code or template changed, so nothing needs
+re-publishing.
+
+### Fixed
+
+-   **`README.md` showed published templates landing in root
+    `views/vendor/plugin-tags/`.** A site scaffolded with `nera new` keeps its
+    presentation in `theme/views/`, and `npx nera-tags` (theme-aware since
+    `@nera-static/plugin-utils` 1.5.0) publishes to
+    `theme/views/vendor/plugin-tags/` there. The Template Publishing section
+    now shows the themed path, with a one-line note for sites still on the
+    root `views/` layout
+
 ## [3.2.2] - 2026-07-22
 
 Documentation only — no code changed, and no template changed, so nothing needs

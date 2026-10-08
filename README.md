@@ -315,16 +315,20 @@ Use the default templates provided by the plugin:
 npx nera-tags
 ```
 
-This copies template files to your project:
+This copies template files to your project. On a site scaffolded with
+`nera new`, whose presentation lives in `theme/views/`, they land here:
 
 ```
-views/vendor/plugin-tags/
+theme/views/vendor/plugin-tags/
 ├── pages/
 │   └── tag-overview.pug
 └── partials/
     ├── tag-cloud.pug
     └── tag-links.pug
 ```
+
+On an older site that renders from a root `views/` folder, drop the `theme/`
+prefix — `npx nera-tags` picks the right destination automatically.
 
 ### Using the templates
 
@@ -344,7 +348,7 @@ include /vendor/plugin-tags/pages/tag-overview
 Point `tag_overview_layout` at a layout that includes
 `pages/tag-overview`, so generated tag pages render through it.
 
-Publishing **skips** a `views/vendor/plugin-tags/` that already exists, so
+Publishing **skips** a `vendor/plugin-tags/` folder that already exists, so
 your edits are never silently overwritten. To pull in updated templates after
 upgrading the plugin, re-run with `--force` — this discards local edits, so
 re-apply them afterwards:
