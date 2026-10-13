@@ -180,8 +180,12 @@ section.tag-overview
                 article.tag-overview__item
                     h2.tag-overview__item-title #{page.meta.title}
                     p.tag-overview__item-description #{page.meta.description}
-                    a.tag-overview__item-link(href=page.meta.href) Read more
+                    a.tag-overview__item-link(href=page.meta.href) #{t('Read more')}
 ```
+
+The shipped template's link text is the translation key `Read more`; add it
+under `translations.<lang>` in `config/app.yaml` (`Read more: Weiterlesen`) to
+translate it.
 
 Generated tag pages carry more than `taggedPages`, and a layout of your own can
 read all of it:

@@ -8,6 +8,9 @@
     // Keyed on the slug, most specific first: a per-language key, then the
     // language-agnostic one, then the raw tag name — accepted as a fallback so
     // a config written before slugs existed keeps working for single-word tags.
+    // The link text goes through the site's translation helper, so a German
+    // site can say "Weiterlesen"; `t` falls back to the key itself.
+    const readMore = typeof t === 'function' ? t('Read more') : 'Read more'
     const tagImage = tagsConfig[`tag_overview_${ lang }_${ meta.tagSlug }_image`] || tagsConfig[`tag_overview_${ meta.tagSlug }_image`] || tagsConfig[`tag_overview_${ meta.tag }_image`] || tagsConfig[`tag_overview_${ lang }_default_image`] || tagsConfig.tag_overview_default_image
 
 section.tag-overview
@@ -28,4 +31,4 @@ section.tag-overview
 
                     p.tag-overview__item-description #{ page.meta.description }
 
-                    a.tag-overview__item-link(href=`${ page.meta.href }`) Read more
+                    a.tag-overview__item-link(href=`${ page.meta.href }`) #{ readMore }

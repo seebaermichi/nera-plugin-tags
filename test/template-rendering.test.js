@@ -146,6 +146,19 @@ describe('Tag templates', () => {
             expect($('.tag-overview__item-link').eq(0).text().trim()).toBe('Read more')
         })
 
+        it('translates the link text through t()', () => {
+            const html = pug.renderFile(template('pages/tag-overview.pug'), {
+                app: {},
+                meta: {
+                    title: 'javascript',
+                    taggedPages: [{ meta: { title: 'A', href: '/a.html' } }],
+                },
+                t: (key) => ({ 'Read more': 'Weiterlesen' })[key] || key,
+            })
+
+            expect(load(html)('.tag-overview__item-link').text().trim()).toBe('Weiterlesen')
+        })
+
         it('renders with custom tag-specific image', () => {
             const templatePath = template('pages/tag-overview.pug')
             const mockData = {
