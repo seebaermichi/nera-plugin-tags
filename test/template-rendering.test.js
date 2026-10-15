@@ -146,6 +146,35 @@ describe('Tag templates', () => {
             expect($('.tag-overview__item-link').eq(0).text().trim()).toBe('Read more')
         })
 
+        it('renders each date as a calendar date in the page language, whatever the time zone', () => {
+            const tz = process.env.TZ
+            // West of UTC, midnight UTC is still the day before.
+            process.env.TZ = 'America/New_York'
+            try {
+                const render = lang => load(pug.renderFile(template('pages/tag-overview.pug'), {
+                    app: { lang: 'en' },
+                    meta: {
+                        lang,
+                        title: 'writing',
+                        tag: 'writing',
+                        taggedPages: [
+                            { meta: { title: 'A post', href: '/posts/a.html', createdAt: new Date('2026-09-21') } },
+                            { meta: { title: 'No date', href: '/posts/b.html', createdAt: 'not a date' } }
+                        ]
+                    }
+                }))
+
+                const $ = render('en')
+                expect($('.tag-overview__item-date')).toHaveLength(1)
+                expect($('.tag-overview__item-date').attr('datetime')).toBe('2026-09-21')
+                expect($('.tag-overview__item-date').text().trim()).toBe('September 21, 2026')
+                expect(render('de')('.tag-overview__item-date').text().trim()).toBe('21. September 2026')
+            } finally {
+                if (tz === undefined) delete process.env.TZ
+                else process.env.TZ = tz
+            }
+        })
+
         it('translates the link text through t()', () => {
             const html = pug.renderFile(template('pages/tag-overview.pug'), {
                 app: {},

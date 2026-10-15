@@ -453,21 +453,23 @@ What the shipped templates emit, for a site with two pages tagged
   </header>
   <section class="tag-overview__content">
     <article class="tag-overview__item">
-      <h2 class="tag-overview__item-title">CSS Grid Layout Guide</h2><time class="tag-overview__item-date">2/3/2026, 12:00:00 AM</time>
+      <h2 class="tag-overview__item-title">CSS Grid Layout Guide</h2><time class="tag-overview__item-date" datetime="2026-02-03">February 3, 2026</time>
       <p class="tag-overview__item-description">Master CSS Grid for modern web layouts</p><a class="tag-overview__item-link" href="/articles/css-grid.html">Read more</a>
     </article>
     <article class="tag-overview__item">
-      <h2 class="tag-overview__item-title">Getting Started with JavaScript</h2><time class="tag-overview__item-date">1/2/2026, 12:00:00 AM</time>
+      <h2 class="tag-overview__item-title">Getting Started with JavaScript</h2><time class="tag-overview__item-date" datetime="2026-01-02">January 2, 2026</time>
       <p class="tag-overview__item-description">Learn the basics of JavaScript programming</p><a class="tag-overview__item-link" href="/articles/js-basics.html">Read more</a>
     </article>
   </section>
 </section>
 ```
 
-Two things to expect rather than be surprised by: the dates come from
-`toLocaleString(meta.lang || app.lang)`, so their exact formatting follows the
-build machine's locale and time zone; and `.tag-overview__image` only appears
-when a [tag image](#tag-images) is configured.
+Two things to expect rather than be surprised by: each date is the page's
+`createdAt` (its frontmatter `date`, when it has one) as a calendar date in the
+page language, `toLocaleDateString(meta.lang || app.lang)` read in UTC, so the
+build machine's time zone never moves it to another day, with the ISO date in
+`datetime`; and `.tag-overview__image` only appears when a
+[tag image](#tag-images) is configured.
 
 ## 🧪 Development
 

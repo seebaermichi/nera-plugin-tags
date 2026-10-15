@@ -97,9 +97,9 @@ describe('README Generated Output block', () => {
             meta: tagPage.meta
         }))
 
-        // The README block is pretty-printed and its `<time>` text is
-        // locale-dependent, so compare the parts that are neither: the class
-        // sequence, the headings and the links.
+        // The README block is pretty-printed, so compare its parts rather than
+        // the markup: the class sequence, the headings, the links and the
+        // dates (calendar dates read in UTC, independent of the machine).
         const documented = load(
             readme.split('```html')[1].split('```')[0] +
                 readme.split('```html')[2].split('```')[0]
@@ -114,6 +114,9 @@ describe('README Generated Output block', () => {
                 .get(),
             hrefs: $('.tag-overview__item-link')
                 .map((_, el) => $(el).attr('href'))
+                .get(),
+            dates: $('.tag-overview__item-date')
+                .map((_, el) => `${$(el).attr('datetime')} ${$(el).text().trim()}`)
                 .get()
         })
 
@@ -130,5 +133,6 @@ describe('README Generated Output block', () => {
         )
         expect(documentedShape.text).toEqual(renderedShape.text)
         expect(documentedShape.hrefs).toEqual(renderedShape.hrefs)
+        expect(documentedShape.dates).toEqual(renderedShape.dates)
     })
 })

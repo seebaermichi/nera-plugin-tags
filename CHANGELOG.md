@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-10-15
+
+### Changed
+
+-   `pages/tag-overview.pug` shows each page's date as a calendar date in the page language (`January 2, 2026`, `2. Januar 2026`) instead of a date and time (`1/2/2026, 12:00:00 AM`), and its `<time>` carries the ISO date in `datetime`. Class names are unchanged. A site with its own copy under `views/vendor/plugin-tags/` keeps the old output until it re-publishes the template (`npx nera-tags` after deleting the folder).
+
+### Fixed
+
+-   The date no longer depends on the build machine's time zone: it was read in local time, so a site built west of UTC (e.g. on a laptop in New York) showed a post dated 2026-09-21 as `9/20/2026, 8:00:00 PM`. It is now read in UTC, the zone core parses a frontmatter `date` in.
+
 ## [3.3.0] - 2026-10-13
 
 ### Added

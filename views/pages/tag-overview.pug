@@ -11,6 +11,13 @@
     // The link text goes through the site's translation helper, so a German
     // site can say "Weiterlesen"; `t` falls back to the key itself.
     const readMore = typeof t === 'function' ? t('Read more') : 'Read more'
+    // A page's date, not a moment: read in UTC, the zone core parses a
+    // frontmatter `date` in, so the build machine's time zone cannot shift it
+    // to the day before.
+    const pageDate = (value) => {
+        const date = new Date(value)
+        return Number.isNaN(date.getTime()) ? null : date
+    }
     const tagImage = tagsConfig[`tag_overview_${ lang }_${ meta.tagSlug }_image`] || tagsConfig[`tag_overview_${ meta.tagSlug }_image`] || tagsConfig[`tag_overview_${ meta.tag }_image`] || tagsConfig[`tag_overview_${ lang }_default_image`] || tagsConfig.tag_overview_default_image
 
 section.tag-overview
@@ -26,8 +33,9 @@ section.tag-overview
                 article.tag-overview__item
                     h2.tag-overview__item-title #{ page.meta.title }
 
-                    if page.meta.createdAt
-                        time.tag-overview__item-date #{ new Date(page.meta.createdAt).toLocaleString(lang) }
+                    - const itemDate = page.meta.createdAt ? pageDate(page.meta.createdAt) : null
+                    if itemDate
+                        time.tag-overview__item-date(datetime=itemDate.toISOString().slice(0, 10)) #{ itemDate.toLocaleDateString(lang, { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) }
 
                     p.tag-overview__item-description #{ page.meta.description }
 
