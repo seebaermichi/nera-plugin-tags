@@ -49,12 +49,7 @@ function pluginOutput() {
     const pages = getMetaData({ app, pagesData })
 
     return {
-        // Vitest runs from the package root, so `getConfig` picks up this
-        // repo's own `config/tags.yaml` — which sets a demo
-        // `tag_overview_default_image` and would render an extra
-        // `.tag-overview__image`. The README block documents the default,
-        // no-config output, so blank it out to match.
-        app: { ...app, tagsConfig: {} },
+        app,
         tagPage: pages.find(page => page.meta.tagSlug === 'web-development'),
         cssPage: pages.find(page => page.meta.title === 'CSS Grid Layout Guide')
     }
