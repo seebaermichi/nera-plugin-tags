@@ -41,37 +41,46 @@ optional and the file itself is too** — the values below are the defaults, and
 with no `config/tags.yaml` at all the plugin runs exactly as shown here:
 
 ```yaml
-# Meta property name containing tags (default: 'tags')
+# Meta property name containing tags
 meta_property_name: tags
 
-# Tag separator (default: ',')
+# Tag separator
 tag_separator: ','
 
-# Base path for tag overview pages (default: '/tags')
+# Base path for tag overview pages
 tag_overview_path: '/tags'
 
-# Multilingual sites: one tag namespace per language (default: false)
+# Multilingual sites: one tag namespace per language
 group_by_lang: false
 
-# Only read when group_by_lang is true (default: false)
+# Only read when group_by_lang is true
 prefix_default_lang: false
 
-# Layout template for tag overview pages (default: 'pages/default.pug')
+# Layout template for tag overview pages
 tag_overview_layout: 'pages/default.pug'
+```
 
+The remaining keys have no default value: without them a tag page gets no
+extra meta and no image. An example, not defaults — set only the ones you need:
+
+```yaml
 # Additional meta properties for tag overview pages
 tag_overview_meta:
   description: 'Browse content by tag'
   layout: 'pages/tag-layout.pug'
 
-# Optional: Tag-specific images, keyed by the tag's slug
+# Tag-specific images, keyed by the tag's slug
 tag_overview_default_image: '/images/tags/default.jpg'
 tag_overview_javascript_image: '/images/tags/js-logo.jpg'
 tag_overview_web-development_image: '/images/tags/webdev.jpg'
 ```
 
 A `layout` inside `tag_overview_meta` **wins over** `tag_overview_layout`. Set
-one or the other; the block above sets both only to show where each goes.
+one or the other; the example sets `layout` only to show where it goes.
+
+The `config/tags.yaml` shipped in the package (the file `nera add tags` copies
+into a site) follows the same split: its active keys are the defaults above,
+and the optional keys are there as comments.
 
 ### Tag images
 

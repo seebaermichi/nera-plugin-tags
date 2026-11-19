@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.1] - 2026-11-19
+
+### Fixed
+
+-   The shipped `config/tags.yaml` no longer sets sample values as if they were defaults. `nera add tags` copies this file into a site, so every tag page of a fresh site pointed at banner images the site does not have and carried sample keywords and description. Its active keys are now exactly the built-in defaults (a site with the copied file builds the same tag pages as a site without one), and the examples are comments. The README's configuration section now separates the defaults from an example of the optional keys.
+-   A site that got its `config/tags.yaml` from `nera add tags` before this release keeps the old values. Unless you set them on purpose, delete these three keys from it: `tag_overview_meta` (with its `keywords` and `description`), `tag_overview_default_image` and `tag_overview_web-development_image`.
+
 ## [3.4.0] - 2026-10-15
 
 ### Changed
