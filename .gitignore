@@ -5,6 +5,16 @@ node_modules
 .npmrc
 plans/
 
+# Environment files (Snagio token) — never commit
+.env
+.env.local
+
+# Test scratch directory
+.tmp/
+
+# Browser-test artifacts (Playwright MCP)
+.playwright-mcp/
+
 # Internal development files (plans, Snagio workflow, specs) never belong in the repo
 /.claude/
 /.mcp.json
